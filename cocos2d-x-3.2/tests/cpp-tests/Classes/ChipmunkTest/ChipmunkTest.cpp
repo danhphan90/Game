@@ -43,13 +43,19 @@ ChipmunkTestLayer::ChipmunkTestLayer()
 
 #if 1
     // Use batch node. Faster
-    auto parent = SpriteBatchNode::create("Images/grossini_dance_atlas.png", 100);
+    auto parent = SpriteBatchNode::create("Images/dice_atlas.png", 100);
+    //auto parent = SpriteBatchNode::create("Images/grossini_dance_atlas.png", 100);
     _spriteTexture = parent->getTexture();
 #else
     // doesn't use batch node. Slower
-    _spriteTexture = Director::getInstance()->getTextureCache()->addImage("Images/grossini_dance_atlas.png");
+    _spriteTexture = Director::getInstance()->getTextureCache()->addImage("Images/dice_atlas.png");
+    //_spriteTexture = Director::getInstance()->getTextureCache()->addImage("Images/grossini_dance_atlas.png");
     auto parent = Node::create();
 #endif
+    
+    
+    
+    
     addChild(parent, 0, kTagParentNode);
 
     addNewSpriteAtPosition(cocos2d::Vec2(200,200));
@@ -105,7 +111,8 @@ void ChipmunkTestLayer::initPhysics()
 
     _space = cpSpaceNew();
 
-    _space->gravity = cpv(0, -100);
+    //_space->gravity = cpv(0, -100);
+    _space->gravity = cpv(0, 0);
 
     //
     // rogue shapes
@@ -184,17 +191,31 @@ void ChipmunkTestLayer::addNewSpriteAtPosition(cocos2d::Vec2 pos)
     posx = CCRANDOM_0_1() * 200.0f;
     posy = CCRANDOM_0_1() * 200.0f;
 
-    posx = (posx % 4) * 85;
-    posy = (posy % 3) * 121;
+//    posx = CCRANDOM_0_1() * 97.0f;
+//    posy = CCRANDOM_0_1() * 103.0f;
+    
+//    posx = (posx % 4) * 85;
+//    posy = (posy % 3) * 121;
+
+    posx = 0;
+    posy = 0;
 
 
     int num = 4;
+//    cpVect verts[] = {
+//        cpv(-24,-54),
+//        cpv(-24, 54),
+//        cpv( 24, 54),
+//        cpv( 24,-54),
+//    };
+
     cpVect verts[] = {
-        cpv(-24,-54),
-        cpv(-24, 54),
-        cpv( 24, 54),
-        cpv( 24,-54),
+        cpv(-24,-26),
+        cpv(-24, 26),
+        cpv(24, 26),
+        cpv( 24,-26),
     };
+
 
     cpBody *body = cpBodyNew(1.0f, cpMomentForPoly(1.0f, num, verts, cpvzero));
 
@@ -202,10 +223,13 @@ void ChipmunkTestLayer::addNewSpriteAtPosition(cocos2d::Vec2 pos)
     cpSpaceAddBody(_space, body);
 
     cpShape* shape = cpPolyShapeNew(body, num, verts, cpvzero);
-    shape->e = 0.5f; shape->u = 0.5f;
+    
+    //shape->e = 0.5f; shape->u = 0.5f;
+    shape->e = 1.0f; shape->u = 0.8f;
     cpSpaceAddShape(_space, shape);
 
-    auto sprite = PhysicsSprite::createWithTexture(_spriteTexture, cocos2d::Rect(posx, posy, 85, 121));
+    //auto sprite = PhysicsSprite::createWithTexture(_spriteTexture, cocos2d::Rect(posx, posy, 85, 121));
+    auto sprite = PhysicsSprite::createWithTexture(_spriteTexture, cocos2d::Rect(posx, posy, 50, 50));
     parent->addChild(sprite);
 
     sprite->setCPBody(body);
@@ -235,6 +259,7 @@ void ChipmunkTestLayer::onAcceleration(Acceleration* acc, Event* event)
     static float prevX=0, prevY=0;
 
 #define kFilterFactor 0.05f
+//#define kFilterFactor 0.5f
 
     float accelX = (float) acc->x * kFilterFactor + (1- kFilterFactor)*prevX;
     float accelY = (float) acc->y * kFilterFactor + (1- kFilterFactor)*prevY;
@@ -243,7 +268,8 @@ void ChipmunkTestLayer::onAcceleration(Acceleration* acc, Event* event)
     prevY = accelY;
 
     auto v = cocos2d::Vec2( accelX, accelY);
-    v = v * 200;
+    //v = v * 200;
+    v = v * 980;
     _space->gravity = cpv(v.x, v.y);
 }
 
